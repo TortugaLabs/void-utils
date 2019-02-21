@@ -1,0 +1,49 @@
+#!/bin/bash
+set -euf -o pipefail
+#
+# Simple script to cycle PA outputs
+#
+
+# determine sinks and default sinks...
+pa_get_sinks() {
+  local list_sinks_output=$(pacmd list-sinks | grep index:)
+  pa_sinks=$(cut -d: -f2 <<<"$list_sinks_output" | sed -e 's/^\s*//')
+  pa_default_sink=$(grep '*' <<<"$list_sinks_output" | cut -d: -f2  | sed -e 's/^\s*//')
+}
+
+pa_next_sink() {
+  local current="$1" ; shift
+  
+  for q in "$@"
+  do
+    if [ -z "$current" ] ; then
+      echo $q
+      return
+    fi
+    if [ "$q" = "$current" ] ; then
+      # OK... found it...
+      current=""
+      continue
+    fi
+  done
+  echo "$1"
+}
+
+pa_redirect_inputs() {
+  local new_sink="$1" ; shift
+
+  local input
+  pacmd list-sink-inputs | grep index: | cut -d: -f2- | sed -e 's/^\s*//' | while read input
+  do
+    pacmd move-sink-input "$input" "$new_sink"
+  done
+}
+
+
+pa_get_sinks
+#echo $pa_sinks
+#echo $pa_default_sink
+new_sink=$(pa_next_sink "$pa_default_sink" $pa_sinks)
+
+pacmd set-default-sink $new_sink
+pa_redirect_inputs $new_sink
