@@ -75,6 +75,9 @@
 "mate-search-tool"
   Mod4 + f
 
+# Run dialog
+"mate-panel --run-dialog"
+  Mod4 + r
 
 
 ##################################

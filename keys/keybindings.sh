@@ -1,5 +1,4 @@
 #!/bin/sh
-gsettings set org.mate.Marco.global-keybindings panel-run-dialog '<Mod4>r' #'<Alt>F2'
 gsettings set org.mate.Marco.global-keybindings show-desktop '<Mod4>d' #'<Control><Alt>d'
 gsettings set org.mate.Marco.global-keybindings panel-main-menu '<Control>Escape' #'<Alt>F1'
 gsettings set org.mate.Marco.window-keybindings maximize '<Mod4>Up'
