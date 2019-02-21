@@ -1,0 +1,167 @@
+#!/usr/bin/env wish
+#
+package require Tk
+lappend ::auto_path /usr/lib/TkXext.vfs/lib
+package require TkXext
+
+option add "*font" "Helvetica 10" widgetDefault
+option add "*Label.anchor" "nw" widgetDefault
+option add "*Label.foreground" "black" widgetDefault
+option add "*Label.background" "grey" widgetDefault
+option add "*Label.borderwidth" 2 widgetDefault
+option add "*Label.relief" "groove" widgetDefault
+option add "*Label.font" "Helvetica 10" widgetDefault
+
+proc init_surf {container status url} {
+  global surf_opts
+  set fake_url "dummy[expr {rand()}]x[expr {rand()}]x[expr {rand()}]x[expr {rand()}]"
+  set fd [open "|surf -e [expr [winfo id $container]] $surf_opts $fake_url &" r]
+  fconfigure $fd -blocking false -buffering none
+  fileevent $fd readable [list EmbedSurf $fd]
+
+  set surf [TkXext.find.window "*${fake_url}*"]
+  set x 0
+  while {$surf eq ""} {
+    after 500
+    set surf [TkXext.find.window "*${fake_url}*"]
+    if {[incr x]>20} {
+      tk_messageBox -icon error -message "Error: Unable to find Surf window" -parent . -type ok
+      exit
+    }
+  }
+  # Also we want to track title changes...
+  set xp [open "|xprop -id [expr 0x$surf] -notype -spy" r]
+  fconfigure $xp -block false -buffering none
+  fileevent $xp readable [list xprop_cb $xp $status]
+
+  TkXext.reparent.window $surf [winfo id $container]
+  bind $container <Configure> [list TkXext.resize.window $surf %w %h]
+  exec xprop -id [expr 0x$surf] -f _SURF_GO 8s -set _SURF_GO $url &
+  bind $container <Destroy> [list KillSurf $surf %W]
+
+}
+proc KillSurf {surf w} {
+  # TkXext.delete.or.kill $surf
+}
+
+proc xprop_cb {fd status} {
+  if {[gets $fd line] < 0} {
+    if {[eof $fd]} {
+      close $fd
+      return
+    }
+    # Could not read a complete line this time; Tcl's
+    # internal buffering will hold the partial line for us
+    # until some more data is available over the socket.
+  } else {
+    #puts stdout "XPROP: $line"
+    if {[regexp {^WM_NAME\s+=\s+"(.*)"$} $line -> name]} {
+      #puts stdout "===: $name"
+      $status config -text "$name"
+    }
+  }
+}  
+
+proc EmbedSurf {fd} {
+  if {[gets $fd line] < 0} {
+    if {[eof $fd]} {
+      close $fd
+      return
+    }
+    # Could not read a complete line this time; Tcl's
+    # internal buffering will hold the partial line for us
+    # until some more data is available over the socket.
+  } else {
+      puts stdout $line
+  }
+}
+
+
+
+
+set url "http://google.com"
+set png_icon "/usr/share/icons/hicolor/48x48/apps/nm-device-wireless.png"
+set title "WebTk App"
+set app_id "webtk"
+set geo "auto"
+set surf_opts [list]
+
+foreach opt $argv {
+  switch -glob $opt {
+    --geom=* {
+      set geo [regsub {^--geom=} $opt {}]
+    }
+    --icon=* {
+      set png_icon [regsub {^--icon=} $opt {}]
+      
+    }
+    --name=* {
+      set app_id [regsub {^--name=} $opt {}]
+    }
+    --title=* {
+      set title [regsub {^--title=} $opt {}]
+    }
+    -* {
+      lappend surf_opts $opt
+    }
+    * {
+      set url $opt
+    }
+  }
+}
+
+if {$geo eq "auto"} {
+  if {[catch {open "$env(HOME)/.config/$app_id.geo" r} fd]} {
+    set geo "=640x480"
+  } else {
+    catch {
+      set geo [string trim [read $fd]]
+    }
+    close $fd
+  }
+}
+if {[file exists "$env(HOME)/.config/$app_id.opts"]} {
+  option readfile "$env(HOME)/.config/$app_id.opts" startupFile
+}
+
+if {![file exists "$png_icon"]} {
+  foreach d [glob -nocomplain "/usr/share/icons/*/*/apps"] {
+    if {[file exists "$d/$png_icon"]} {
+      set png_icon "$d/$png_icon"
+      puts "Using $png_icon"
+      break
+    }
+  }
+}
+
+set img [image create photo icon -file $png_icon]
+wm iconphoto . -default $img
+wm title . $title
+wm geometry . $geo
+wm protocol . WM_DELETE_WINDOW quit_app
+wm protocol . WM_SAVE_YOURSELF save_me
+
+proc save_me {} {
+  global env app_id
+  if {![catch {open "$env(HOME)/.config/$app_id.geo" w} fd]} {
+    puts $fd [wm geometry .]
+    close $fd
+  } else {
+    puts $fd
+  }
+}
+
+proc quit_app {} {
+  save_me
+  destroy .
+}
+
+frame .wb -container yes
+pack .wb -expand 1 -fill both -side top
+label .st
+pack .st -expand 0 -fill x -side bottom
+#puts "Parent ID: [winfo id .]"
+#puts "Window ID: [winfo id .wb]"
+
+init_surf .wb .st $url 
+
