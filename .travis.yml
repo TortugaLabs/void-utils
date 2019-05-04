@@ -1,0 +1,34 @@
+language: bash
+
+env:
+  global:
+  - PATH=$PATH:/tmp/bin
+
+  matrix:
+  - ARCH=x86_64 BOOTSTRAP=x86_64
+  - ARCH=i686 BOOTSTRAP=i686
+  - ARCH=x86_64-musl BOOTSTRAP=x86_64-musl
+
+install:
+#~ - common/travis/docker.sh
+- echo install
+- docker pull voidlinux/masterdir-$BOOTSTRAP
+- docker run -d --name void -v "$(pwd)":/hostrepo -v /tmp:/tmp -e PATH="$PATH" voidlinux/masterdir-$BOOTSTRAP /bin/sh -c 'sleep inf'
+
+before_script:
+#~ - common/travis/set_mirror.sh
+#~ - common/travis/prepare.sh
+#~ - common/travis/fetch_upstream.sh
+#~ - common/travis/changed_templates.sh
+#~ - common/travis/fetch-xtools.sh
+#~ - common/travis/xlint.sh
+- echo before script
+
+script:
+#~ - docker exec -t void hostrepo/common/travis/build.sh $BOOTSTRAP $ARCH; fi
+- echo script
+
+after_script:
+#~ - docker exec -t void hostrepo/common/travis/show_files.sh $BOOTSTRAP $ARCH; fi
+- echo after script
+
