@@ -3,17 +3,18 @@ language: bash
 env:
   global:
   - PATH=$PATH:/tmp/bin
+  - TAG=2019042701
 
   matrix:
-  - ARCH=x86_64 BOOTSTRAP=x86_64
-  - ARCH=i686 BOOTSTRAP=i686
+  #~ - ARCH=x86_64 BOOTSTRAP=x86_64
+  #~ - ARCH=i686 BOOTSTRAP=i686
   - ARCH=x86_64-musl BOOTSTRAP=x86_64-musl
 
 install:
 #~ - common/travis/docker.sh
 - echo install
-- docker pull voidlinux/masterdir-$BOOTSTRAP
-- docker run -d --name void -v "$(pwd)":/hostrepo -v /tmp:/tmp -e PATH="$PATH" voidlinux/masterdir-$BOOTSTRAP /bin/sh -c 'sleep inf'
+- docker pull voidlinux/masterdir-$BOOTSTRAP:$TAG
+- docker run -d --name void -v "$(pwd)":/hostrepo -v /tmp:/tmp -e PATH="$PATH" voidlinux/masterdir-$BOOTSTRAP:$TAG /bin/sh -c 'sleep inf'
 
 before_script:
 #~ - common/travis/set_mirror.sh
