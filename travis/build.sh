@@ -10,7 +10,7 @@ set -x
 ls -l
 pwd
 type gcc
-
+xbps-query -L
 
 exit 0
 
