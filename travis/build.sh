@@ -2,40 +2,20 @@
 #
 # build.sh
 
+set -euf -o pipefail
+
 if [ "$1" != "$2" ]; then
   arch="-a $2"
 fi
+bootstrap="$1"
+arch="$2"
 
-set -x
-ls -l
-pwd
-type gcc
-xbps-query -L
-ldd --help
-exit 0
-
-# Tell xbps-src what is our arch, this is done when doing
-# binary-bootstrap, but we need to do it every time since
-# our masterdir is ethereal.
-# /bin/echo -e '\x1b[32mWriting bootstrap arch into .xbps_chroot_init of masterdir\x1b[0m'
-# echo "$1" > /hostrepo/masterdir/.xbps_chroot_init
-
-/bin/echo -e '\x1b[32mPreparing chroot with chroot_prepare()\x1b[0m'
-source hostrepo/common/xbps-src/shutils/chroot.sh || {
-	echo "Failed to source chroot.sh for chroot_prepare()" >&2 ;
-	exit 1
-}
-
-XBPS_SRCPKGDIR=/hostrepo/srcpkgs XBPS_MASTERDIR=/ chroot_prepare $1 || {
-	echo "Failed to prepare chroot!" >&2 ;
-	exit 1
-}
-
-PKGS=$(/hostrepo/xbps-src sort-dependencies $(cat /tmp/templates))
-
-for pkg in ${PKGS}; do
-	/hostrepo/xbps-src -H "$HOME"/hostdir $arch pkg "$pkg"
-	[ $? -eq 1 ] && exit 1
-done
+if [ "$arch" = "x86_64-musl" ] ; then
+  cd /hostrepo
+  rm -f glibc
+  gcc -s -o glibc glibc.c
+  tar zcvf glibc-$arch.tar.gz glibc
+  rm -f glibc
+fi
 
 exit 0

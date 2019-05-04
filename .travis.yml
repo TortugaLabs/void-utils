@@ -21,7 +21,6 @@ before_script:
 script:
 - docker exec -t void hostrepo/travis/build.sh $BOOTSTRAP $ARCH
 
-after_script:
+#~ after_script:
 #~ - docker exec -t void hostrepo/common/travis/show_files.sh $BOOTSTRAP $ARCH; fi
-- echo after script
 
