@@ -17,12 +17,13 @@ install:
 before_script:
 - echo before script
 #~ - travis/set_mirror.sh
-- ls -l
-- common/travis/prepare.sh
-#~ - common/travis/fetch_upstream.sh
-#~ - common/travis/changed_templates.sh
-#~ - common/travis/fetch-xtools.sh
-#~ - common/travis/xlint.sh
+#~ - ls -l
+#~ - travis/prepare.sh
+#~ - travis/fetch_upstream.sh
+#~ - travis/changed_templates.sh
+#~ - travis/fetch-xtools.sh
+- mkdir -p /tmp/bin
+- wget -q -O - https://github.com/chneukirchen/xtools/archive/master.tar.gz | gunzip | tar x -C /tmp/bin --wildcards "xtools-master/x*" --strip-components=1 || exit 1
 
 script:
 #~ - docker exec -t void hostrepo/common/travis/build.sh $BOOTSTRAP $ARCH; fi
