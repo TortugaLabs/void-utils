@@ -15,19 +15,11 @@ install:
 - docker run -d --name void -v "$(pwd)":/hostrepo -v /tmp:/tmp -e PATH="$PATH" voidlinux/masterdir-$BOOTSTRAP:$TAG /bin/sh -c 'sleep inf'
 
 before_script:
-- echo before script
-#~ - travis/set_mirror.sh
-#~ - ls -l
-#~ - travis/prepare.sh
-#~ - travis/fetch_upstream.sh
-#~ - travis/changed_templates.sh
-#~ - travis/fetch-xtools.sh
 - mkdir -p /tmp/bin
 - wget -q -O - https://github.com/chneukirchen/xtools/archive/master.tar.gz | gunzip | tar x -C /tmp/bin --wildcards "xtools-master/x*" --strip-components=1 || exit 1
 
 script:
-#~ - docker exec -t void hostrepo/common/travis/build.sh $BOOTSTRAP $ARCH; fi
-- echo script
+- docker exec -t void hostrepo/travis/build.sh $BOOTSTRAP $ARCH
 
 after_script:
 #~ - docker exec -t void hostrepo/common/travis/show_files.sh $BOOTSTRAP $ARCH; fi
