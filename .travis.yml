@@ -16,8 +16,9 @@ install:
 
 before_script:
 - echo before script
-- travis/set_mirror.sh
-#~ - common/travis/prepare.sh
+#~ - travis/set_mirror.sh
+- ls -l
+- common/travis/prepare.sh
 #~ - common/travis/fetch_upstream.sh
 #~ - common/travis/changed_templates.sh
 #~ - common/travis/fetch-xtools.sh
