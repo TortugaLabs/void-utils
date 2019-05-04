@@ -11,7 +11,7 @@ ls -l
 pwd
 type gcc
 xbps-query -L
-
+ldd --help
 exit 0
 
 # Tell xbps-src what is our arch, this is done when doing
