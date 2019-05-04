@@ -24,3 +24,11 @@ script:
 #~ after_script:
 #~ - docker exec -t void hostrepo/common/travis/show_files.sh $BOOTSTRAP $ARCH; fi
 
+deploy:
+  provider: releases
+  api_key: "$GITHUB_OATH_TOKEN"
+  file:
+  - glibc-x86_64-musl.tar.gz
+  skip_cleanup: true
+  on:
+    tags: true

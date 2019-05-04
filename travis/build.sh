@@ -18,4 +18,6 @@ if [ "$arch" = "x86_64-musl" ] ; then
   rm -f glibc
 fi
 
+ls -l
+
 exit 0
