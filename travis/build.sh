@@ -11,11 +11,13 @@ bootstrap="$1"
 arch="$2"
 
 if [ "$arch" = "x86_64-musl" ] ; then
-  cd /hostrepo
-  rm -f glibc
-  gcc -s -o glibc glibc.c
-  tar zcvf glibc-$arch.tar.gz glibc
-  rm -f glibc
+  (
+    cd /hostrepo/glibc
+    rm -f glibc
+    gcc -s -o glibc glibc.c
+    tar zcvf /hostrepo/glibc-$arch.tar.gz glibc
+    rm -f glibc
+  )
 fi
 
 ls -l
